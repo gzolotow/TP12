@@ -37,6 +37,7 @@ interface InstagramContextValue {
   posts: Post[];
   toggleLike: (postId: string) => void;
   toggleSave: (postId: string) => void;
+  addComment: (postId: string, text: string) => void;
 }
 
 const InstagramContext = createContext<InstagramContextValue | undefined>(undefined);
@@ -54,7 +55,15 @@ export function InstagramProvider({ children }: PropsWithChildren) {
     setPosts((current) => current.map((post) => post.id === postId ? { ...post, isSaved: !post.isSaved } : post));
   };
 
-  const value = useMemo(() => ({ posts, toggleLike, toggleSave }), [posts]);
+  const addComment = (postId: string, text: string) => {
+    const trimmedText = text.trim();
+    if (!trimmedText) return;
+    setPosts((current) => current.map((post) => post.id === postId
+      ? { ...post, comments: [...post.comments, { id: `comment-${Date.now()}`, username: 'gatitos.ar', text: trimmedText }] }
+      : post));
+  };
+
+  const value = useMemo(() => ({ posts, toggleLike, toggleSave, addComment }), [posts]);
   return <InstagramContext.Provider value={value}>{children}</InstagramContext.Provider>;
 }
 
